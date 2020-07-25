@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Model\SteamResponseData\Achievement.cs" />
+    <Compile Remove="Model\SteamResponseData\App.cs" />
+    <Compile Remove="Model\SteamResponseData\AppList.cs" />
+    <Compile Remove="Model\SteamResponseData\AvailableGameStats.cs" />
+    <Compile Remove="Model\SteamResponseData\GetAppListResult.cs" />
+    <Compile Remove="Model\SteamResponseData\GetOwnedGamesResponse.cs" />
+    <Compile Remove="Model\SteamResponseData\GetOwnedGamesResult.cs" />
+    <Compile Remove="Model\SteamResponseData\GetPlayerAchievementsResponse.cs" />
+    <Compile Remove="Model\SteamResponseData\GetPlayerAchievementsResult.cs" />
+    <Compile Remove="Model\SteamResponseData\GetSchemaForGameResponse.cs" />
+    <Compile Remove="Model\SteamResponseData\GetSchemaForGameResult.cs" />
+    <Compile Remove="Model\SteamResponseData\ResolveVanityURLResponse.cs" />
+    <Compile Remove="Model\SteamResponseData\ResolveVanityURLResult.cs" />
+    <Compile Remove="Model\SteamResponseData\Stat.cs" />
+    <Compile Remove="Model\SteamResponseData\UserAchievement.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Fonts\Yantramanav-Black.ttf" />
+    <None Remove="Fonts\Yantramanav-Bold.ttf" />
+    <None Remove="Fonts\Yantramanav-Light.ttf" />
+    <None Remove="Fonts\Yantramanav-Medium.ttf" />
+    <None Remove="Fonts\Yantramanav-Regular.ttf" />
+    <None Remove="Fonts\Yantramanav-Thin.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Fonts\Yantramanav-Black.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Yantramanav-Bold.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Yantramanav-Light.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Yantramanav-Medium.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Yantramanav-Regular.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Yantramanav-Thin.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DAL\" />
+    <Folder Include="ViewModel\" />
+  </ItemGroup>
+
+</Project>
