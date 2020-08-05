@@ -9,19 +9,35 @@ namespace GamePlatformsClient
         public static string key = "39303736A8DB0BC62D1142B202DEA41B";
 
         public static string GetResolveVanityURL(string nickname) =>
-            SteamApiRequestURL.resolveVanityURL.Replace("{0}", key).Replace("{1}", nickname);
-        public static string GetAppListURL() =>
+            SteamApiRequestURL.resolveVanityURL
+            .Replace("{0}", key)
+            .Replace("{1}", nickname);
+        public static string GetAppList() =>
             SteamApiRequestURL.getAppList;
         public static string GetOwnedGames(string userSteamId, bool includeAppinfo = true) =>
-            SteamApiRequestURL.getOwnedGames.Replace("{0}", key).Replace("{1}", userSteamId).Replace("{2}", includeAppinfo.ToString());
+            SteamApiRequestURL.getOwnedGames
+            .Replace("{0}", key)
+            .Replace("{1}", userSteamId)
+            .Replace("{2}", includeAppinfo.ToString());
         public static string GetPlayerAchievements(string userSteamID, string appid, string language = "english") =>
-            SteamApiRequestURL.getPlayerAchievements.Replace("{0}", key).Replace("{1}", userSteamID).Replace("{2}", appid).Replace("{3}", language);
+            SteamApiRequestURL.getPlayerAchievements
+            .Replace("{0}", key)
+            .Replace("{1}", userSteamID)
+            .Replace("{2}", appid)
+            .Replace("{3}", language);
         public static string GetGlobalAchievementPercentagesForApp(string gameid) =>
-            SteamApiRequestURL.getGlobalAchievementPercentagesForApp.Replace("{0}", gameid);
+            SteamApiRequestURL.getGlobalAchievementPercentagesForApp
+            .Replace("{0}", gameid);
         public static string GetSchemaForGame(string appid, string language = "english") =>
-            SteamApiRequestURL.getSchemaForGame.Replace("{0}", key).Replace("{1}", appid).Replace("{2}", language);
+            SteamApiRequestURL.getSchemaForGame
+            .Replace("{0}", key)
+            .Replace("{1}", appid)
+            .Replace("{2}", language);
         public static string GetUserStatsForGame(string userSteamID, string appid) =>
-            SteamApiRequestURL.getUserStatsForGame.Replace("{0}", key).Replace("{1}", userSteamID).Replace("{2}", appid);
+            SteamApiRequestURL.getUserStatsForGame
+            .Replace("{0}", key)
+            .Replace("{1}", userSteamID)
+            .Replace("{2}", appid);
 
         private class SteamApiRequestURL
         {
