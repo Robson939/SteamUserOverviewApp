@@ -19,24 +19,61 @@ using System.Threading;
 using System.Reflection;
 using System.Net;
 using GamePlatformsClient.DAL;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Configuration;
 
 namespace GamePlatformsClient
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public static string playerId;
 
         ISteamService steamRepository;
+        private string _loadStatusInfo = "";
+        public string LoadStatusInfo 
+        {
+            get
+            {
+                return _loadStatusInfo;
+            }
+            set
+            {
+                _loadStatusInfo = value;
+                OnPropertyChanged();
+            }
+        }
+
+        //private ObservableCollection<GameListViewItem> _gameListViewItems = new ObservableCollection<GameListViewItem>();
+        public ObservableCollection<GameListViewItem> GameListViewItems { get; set; } = new ObservableCollection<GameListViewItem>();
+        public ObservableCollection<UserAchievement> UserAchievementList { get; set; } = new ObservableCollection<UserAchievement>();
+        public ObservableCollection<UserStatistic> UserStatisticList { get; set; } = new ObservableCollection<UserStatistic>();
+
+
+        //public string GetLoadStatusInfo()
+        //{
+        //    return loadStatusInfo;
+        //}
+
+        //public void SetLoadStatusInfo(string value)
+        //{
+        //    loadStatusInfo = value;
+        //}
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
 
         public MainWindow()
         {
             steamRepository = new SteamService();
-
             InitializeComponent();
-
             this.DataContext = this;
         }
 
@@ -48,7 +85,7 @@ namespace GamePlatformsClient
             }
             catch (Exception ex)
             {
-                DataLoadStatus.Text = ex.ToString();
+                LoadStatusInfo = ex.ToString();
             }
         }
 
@@ -71,7 +108,7 @@ namespace GamePlatformsClient
             cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.Token.Register(() =>
             {
-                DataLoadStatus.Text += "Cancellation requested" + Environment.NewLine;
+                LoadStatusInfo += "Cancellation requested" + Environment.NewLine;
                 return;
             });
 
@@ -81,7 +118,7 @@ namespace GamePlatformsClient
             {
                 #region Get user info
 
-                DataLoadStatus.Text = "Get user info";
+                LoadStatusInfo = "Get user info";
 
                 ResolveVanityURLData.Rootobject resolveVanityURLData = await steamRepository.ResolveVanityURLData(nickname.Text, cancellationTokenSource.Token);
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -92,31 +129,46 @@ namespace GamePlatformsClient
 
                 #region Get user games
 
-                DataLoadStatus.Text = "Get user games";
+                LoadStatusInfo = "Get user games";
 
                 GetOwnedGamesData.Rootobject getOwnedGamesData = await steamRepository.GetOwnedGamesData(playerId, cancellationTokenSource.Token);
 
-                listView.ClearValue(ItemsControl.ItemsSourceProperty);
+                //listView.ClearValue(ItemsControl.ItemsSourceProperty);
 
                 List<GameListViewItem> playerGames = new List<GameListViewItem>();
 
                 await Task.Run(() =>
                 {
+                    //Dispatcher.Invoke(() =>
+                    //{
+                    //    foreach (var element in getOwnedGamesData.Response.Games)
+                    //    {
+                    //        playerGames.Add(new GameListViewItem()
+                    //        {
+                    //            Id = element.Appid,
+                    //            GameTitle = element.Name,
+                    //            GameIcon = $"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{element.Appid}/{element.Img_icon_url}.jpg"
+                    //        });
+                    //    }
+
+                    //    listView.ItemsSource = playerGames.OrderBy(x => x.GameTitle).ToList();
+                    //    listView.SelectedIndex = 0;
+
+                    //});
+
+                    //GameListViewItems = new ObservableCollection<GameListViewItem>
+
+
                     Dispatcher.Invoke(() =>
                     {
-                        foreach (var element in getOwnedGamesData.Response.Games)
+                        GameListViewItems.Clear();
+                        
+                        GameListViewItems = new ObservableCollection<GameListViewItem>((getOwnedGamesData.Response.Games.Select(element => new GameListViewItem()
                         {
-                            playerGames.Add(new GameListViewItem()
-                            {
-                                Id = element.Appid,
-                                GameTitle = element.Name,
-                                GameIcon = $"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{element.Appid}/{element.Img_icon_url}.jpg"
-                            });
-                        }
-
-                        listView.ItemsSource = playerGames.OrderBy(x => x.GameTitle).ToList();
-                        listView.SelectedIndex = 0;
-
+                            Id = element.Appid,
+                            GameTitle = element.Name,
+                            GameIcon = $"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{element.Appid}/{element.Img_icon_url}.jpg"
+                        }).OrderBy(x => x.GameTitle)));
                     });
                 }, cancellationTokenSource.Token);
 
@@ -124,15 +176,15 @@ namespace GamePlatformsClient
 
                 #endregion
 
-                DataLoadStatus.Text = $"Data loaded for user: {nickname.Text}";
+                LoadStatusInfo = $"Data loaded for user: {nickname.Text}";
             }
             catch (OperationCanceledException)
             {
-                DataLoadStatus.Text = "The operation was cancelled";
+                LoadStatusInfo = "The operation was cancelled";
             }
             catch (Exception ex)
             {
-                DataLoadStatus.Text = ex.ToString();
+                LoadStatusInfo = ex.ToString();
             }
             finally
             {
@@ -162,7 +214,7 @@ namespace GamePlatformsClient
         //        cancellationTokenSource = new CancellationTokenSource();
         //        cancellationTokenSource.Token.Register(() =>
         //        {
-        //            DataLoadStatus.Text += "Cancellation requested" + Environment.NewLine;
+        //            loadStatusInfo += "Cancellation requested" + Environment.NewLine;
         //            ProgressBar.Visibility = Visibility.Hidden;
         //            return;
         //        });
@@ -171,7 +223,7 @@ namespace GamePlatformsClient
         //        try
         //        {
 
-        //            DataLoadStatus.Text = "Get user info";
+        //            loadStatusInfo = "Get user info";
 
         //            var response = await httpClient.GetAsync(SteamApiRequestManager.GetResolveVanityURL(nickname.Text), cancellationTokenSource.Token);
         //            response.EnsureSuccessStatusCode();
@@ -179,7 +231,7 @@ namespace GamePlatformsClient
 
 
 
-        //            DataLoadStatus.Text = "Get user id";
+        //            loadStatusInfo = "Get user id";
 
         //            string content = await response.Content.ReadAsStringAsync();
         //            string userId = ""; 
@@ -195,7 +247,7 @@ namespace GamePlatformsClient
 
 
 
-        //            DataLoadStatus.Text = "Get user games";
+        //            loadStatusInfo = "Get user games";
 
         //            response = await httpClient.GetAsync(SteamApiRequestManager.GetOwnedGames(userId), cancellationTokenSource.Token);
         //            response.EnsureSuccessStatusCode();
@@ -205,7 +257,7 @@ namespace GamePlatformsClient
 
 
 
-        //            DataLoadStatus.Text = "Set user games list";
+        //            loadStatusInfo = "Set user games list";
 
         //            await Task.Run(() => 
         //            {
@@ -230,13 +282,13 @@ namespace GamePlatformsClient
         //                });
         //            }, cancellationTokenSource.Token);
 
-        //            DataLoadStatus.Text = $"Data loaded for user: {nickname.Text}";
+        //            loadStatusInfo = $"Data loaded for user: {nickname.Text}";
         //            ProgressBar.Visibility = Visibility.Hidden;
         //            send.Content = "Send";
         //        }
         //        catch (Exception ex)
         //        {
-        //            DataLoadStatus.Text = ex.ToString();
+        //            loadStatusInfo = ex.ToString();
         //        }
         //        finally
         //        {
@@ -247,6 +299,8 @@ namespace GamePlatformsClient
 
         string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/9/header.jpg";
         CancellationTokenSource cancellationTokenSourceSelectionChanged = null;
+
+
 
 
         private async void GamesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -269,8 +323,6 @@ namespace GamePlatformsClient
 
                 #region game miniature
 
-                List<UserAchievement> userAchievementList = new List<UserAchievement>();
-                List<UserStatistic> userStatisticList = new List<UserStatistic>();
                 GameListViewItem selectedItem = (GameListViewItem)((ListView)sender).SelectedItem;
 
 
@@ -290,7 +342,8 @@ namespace GamePlatformsClient
 
                     //to do: working on single task inside this method (getting achievements data task -> continue with getting achievements of player)
 
-                    achievementsList.ClearValue(ItemsControl.ItemsSourceProperty);
+                    //achievementsList.ClearValue(ItemsControl.ItemsSourceProperty);
+                    UserAchievementList.Clear();
 
                     if (data.Game.AvailableGameStats != null)
                     {
@@ -304,7 +357,7 @@ namespace GamePlatformsClient
                                 {
                                     foreach (var x in data.Game.AvailableGameStats.Achievements)
                                     {
-                                        userAchievementList.Add(new UserAchievement()
+                                        UserAchievementList.Add(new UserAchievement()
                                         {
                                             ApiName = x.Name,
                                             DisplayName = x.DisplayName,
@@ -327,7 +380,7 @@ namespace GamePlatformsClient
                                 {
                                     foreach (var x in data.Game.AvailableGameStats.Stats)
                                     {
-                                        userStatisticList.Add(new UserStatistic()
+                                        UserStatisticList.Add(new UserStatistic()
                                         {
                                             DisplayName = x.DisplayName,
                                             DefaultValue = x.Defaultvalue,
@@ -355,7 +408,7 @@ namespace GamePlatformsClient
                         { 
                             foreach (var element in data.Playerstats.Achievements)
                             {
-                                UserAchievement ach = userAchievementList.FirstOrDefault(x => x.ApiName == element.Apiname);
+                                UserAchievement ach = UserAchievementList.FirstOrDefault(x => x.ApiName == element.Apiname);
                                 if (ach != null)
                                 {
                                     ach.Achieved = element.Achieved == 0;
@@ -365,7 +418,8 @@ namespace GamePlatformsClient
                         });
                     }, cancellationToken);
 
-                    achievementsList.ItemsSource = userAchievementList.OrderBy(x => x.Achieved).ToList();
+                    //achievementsList.ItemsSource = UserAchievementList.OrderBy(x => x.Achieved).ToList();
+                    UserAchievementList = new ObservableCollection<UserAchievement>(UserAchievementList.OrderBy(x => x.Achieved));
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -404,16 +458,20 @@ namespace GamePlatformsClient
 
                 #endregion
 
-                DataLoadStatus.Text = "Done";
+                LoadStatusInfo = "Done";
 
             }
             catch (OperationCanceledException)
             {
-                DataLoadStatus.Text = "The operation was cancelled";
+                LoadStatusInfo = "The operation was cancelled";
+            }
+            catch (HttpRequestException)
+            {
+                LoadStatusInfo = "Bad Request";
             }
             catch (Exception ex)
             {
-                DataLoadStatus.Text = ex.ToString();
+                LoadStatusInfo = ex.ToString();
             }
             finally
             {
@@ -436,10 +494,101 @@ namespace GamePlatformsClient
 
     }
 
+
+
+
+
     public class GameListViewItem
     {
-        public uint Id { get; set; }
-        public string GameTitle { get; set; }
-        public string GameIcon { get; set; }
+        private uint _id;
+        public uint Id
+        {
+            get
+            {
+                return _id;
+            }
+            set
+            {
+                _id = value;
+            }
+        }
+
+        private string _gameTitle;
+        public string GameTitle
+        {
+            get
+            {
+                return _gameTitle;
+            }
+            set
+            {
+                _gameTitle = value;
+            }
+        }
+        private string _gameIcon;
+        public string GameIcon
+        {
+            get
+            {
+                return _gameIcon;
+            }
+            set
+            {
+                _gameIcon = value;
+            }
+        }
     }
+
+
+
+    //public class GameListViewItem: INotifyPropertyChanged
+    //{
+    //    private uint _id;
+    //    public uint Id 
+    //    {
+    //        get
+    //        {
+    //            return _id;
+    //        }
+    //        set
+    //        {
+    //            _id = value;
+    //            OnPropertyChanged("Id");
+    //        }
+    //    }
+
+    //    private string _gameTitle;
+    //    public string GameTitle 
+    //    {
+    //        get
+    //        {
+    //            return _gameTitle;
+    //        }
+    //        set
+    //        {
+    //            _gameTitle = value;
+    //            OnPropertyChanged("GameTitle");
+    //        }
+    //    }
+    //    private string _gameIcon;
+    //    public string GameIcon 
+    //    {
+    //        get
+    //        {
+    //            return _gameIcon;
+    //        }
+    //        set
+    //        {
+    //            _gameIcon = value;
+    //            OnPropertyChanged("GameIcon");
+    //        }
+    //    }
+
+    //    public event PropertyChangedEventHandler PropertyChanged;
+
+    //    protected void OnPropertyChanged(string name = null)
+    //    {
+    //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    //    }
+    //}
 }

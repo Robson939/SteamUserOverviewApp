@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
     xmlns:local="clr-namespace:GamePlatformsClient"
     mc:Ignorable="d"
     Title="MainWindow" Height="728" Width="1280" Margin="0" Padding="0" 
@@ -12,7 +13,7 @@
     <DockPanel Height="auto">
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
-                <TextBlock Padding="0" x:Name="DataLoadStatus"> No data loaded</TextBlock>
+                <TextBlock Padding="0" x:Name="DataLoadStatus" Text="{Binding LoadStatusInfo, FallbackValue='Error', Mode=OneWay}"/>
             </StatusBarItem>
             <StatusBarItem>
                 <ProgressBar x:Name="ProgressBar" Width="200" Height="15" Visibility="Hidden"></ProgressBar>
@@ -49,7 +50,7 @@
                 <GroupBox Padding="0" BorderThickness="0">
                     <!--<DataGrid x:Name="result" SelectionChanged="SelectionChanged"></DataGrid>-->
                     <Grid>
-                        <ListView x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectionChanged="GamesList_SelectionChanged">
+                        <ListView x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectionChanged="GamesList_SelectionChanged" ItemsSource="{Binding GameListViewItems}">
                             <ListView.Style>
                                 <Style TargetType="ListView">
                                     <Setter Property="Background" Value="#24282f"></Setter>
@@ -192,6 +193,7 @@
                         <Grid.RowDefinitions>
                             <!--<RowDefinition Height="30" />-->
                             <RowDefinition Height="124" />
+                            <RowDefinition Height="50" />
                             <RowDefinition Height="*" />
 
                         </Grid.RowDefinitions>
@@ -212,10 +214,22 @@
                             </Label>
                             <Image Grid.Column="1" Source="https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png" Name="gameScreen" Height="114" Width="244"  />
                         </Grid>
+                        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="DarkOliveGreen">
 
+                            <TabControl>
+                                <TabItem Header="User Achievements"></TabItem>
+                                <TabItem Header="Global Achievements"></TabItem>
+                                <TabItem Header="User Statistics"></TabItem>
+                                <TabItem Header="Global Statistics"></TabItem>
+                            </TabControl>
+                            
+                            
+                            
+                            
+                        </Grid>
                         <!--<Image Grid.Row="0" Source="https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png" Name="gameScreen" Height="172" Width="368" />-->
-                        <Grid Grid.Row="1" HorizontalAlignment="Stretch">
-                            <ListView x:Name="achievementsList" HorizontalContentAlignment="Stretch">
+                        <Grid Grid.Row="2" HorizontalAlignment="Stretch">
+                            <ListView x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="{x:Type ListViewItem}">
                                         <Setter Property="Focusable" Value="False"/>
@@ -228,7 +242,7 @@
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <Image Grid.Column="0" Source="{Binding CurrentIcon}" Width="64" Height="64"></Image>
+                                                        <Image Grid.Column="0" Source="{Binding Path=CurrentIcon}" Width="64" Height="64"></Image>
                                                         <!--<TextBlock Grid.Column="1" Text="{Binding }" Foreground="#a1a8b7" FontSize="14" Padding="2" Margin="1" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>-->
                                                         <Grid Grid.Column="1" Margin="5" Background="AliceBlue" HorizontalAlignment="Stretch">
                                                             <Grid.RowDefinitions>
