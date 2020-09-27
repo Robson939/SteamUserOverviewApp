@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace GamePlatformsClient.SteamResponseData
+namespace GamePlatformsClient.Model.SteamResponseData
 {
     public class ResolveVanityURLData
     {

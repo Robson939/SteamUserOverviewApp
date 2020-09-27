@@ -5,16 +5,18 @@ using System.Text;
 
 namespace GamePlatformsClient.ViewModel
 {
-    class MainPanelViewModel : INotifyPropertyChanged
+    public class MainPanelViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
         private void RaisePropertyChanged(string propertyChanged)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyChanged));
         }
 
+        public MainPanelViewModel()
+        {
 
+        }
 
 
 

@@ -7,7 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <converter:DoNothingConverter x:Key="localDoNothingConverter"></converter:DoNothingConverter>
-            
+            <converter:PercentageConverter x:Key="percentageConverter"></converter:PercentageConverter>
         </ResourceDictionary> 
         
     </Application.Resources>

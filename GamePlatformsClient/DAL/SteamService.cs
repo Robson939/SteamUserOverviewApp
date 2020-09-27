@@ -1,4 +1,4 @@
-﻿using GamePlatformsClient.SteamResponseData;
+﻿using GamePlatformsClient.Model.SteamResponseData;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -40,6 +40,18 @@ namespace GamePlatformsClient.DAL
             return JsonSerializer.Deserialize<GetPlayerAchievementsData.Rootobject>(content);
         }
 
+        public async Task<GetUserStatsForGameData.Rootobject> GetUserStatsForGame(string userSteamID, string appid, CancellationToken cancellationToken)
+        {
+            HttpClient httpClient = HttpClientFactory.Create();
+
+            HttpResponseMessage response = await httpClient.GetAsync(SteamApiRequestManager.GetUserStatsForGame(userSteamID, appid), cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            string content = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<GetUserStatsForGameData.Rootobject>(content);
+        }
+
         public async Task<GetSchemaForGameData.Rootobject> GetSchemaForGameData(string appid, CancellationToken cancellationToken)
         {
             HttpClient httpClient = HttpClientFactory.Create();
@@ -61,6 +73,18 @@ namespace GamePlatformsClient.DAL
             string content = await response.Content.ReadAsStringAsync();
 
             return JsonSerializer.Deserialize<ResolveVanityURLData.Rootobject>(content);
+        }
+
+        public async Task<GetGlobalAchievementPercentagesForAppData.Rootobject> GetGlobalAchievementPercentagesForAppData(string gameid, CancellationToken cancellationToken)
+        {
+            HttpClient httpClient = HttpClientFactory.Create();
+
+            var response = await httpClient.GetAsync(SteamApiRequestManager.GetGlobalAchievementPercentagesForApp(gameid), cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            string content = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<GetGlobalAchievementPercentagesForAppData.Rootobject>(content);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace GamePlatformsClient
 {
     public static class SteamApiRequestManager
     {
-        public static string key = "39303736A8DB0BC62D1142B202DEA41B";
+        public static string key = " "; //insert your api key here
 
         public static string GetResolveVanityURL(string nickname) =>
             SteamApiRequestURL.resolveVanityURL

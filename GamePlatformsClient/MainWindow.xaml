@@ -5,6 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
     xmlns:local="clr-namespace:GamePlatformsClient"
+    xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf" 
     mc:Ignorable="d"
     Title="MainWindow" Height="728" Width="1280" Margin="0" Padding="0" 
     ResizeMode="NoResize" FontFamily="./Fonts/#Yantramanav">
@@ -50,7 +51,7 @@
                 <GroupBox Padding="0" BorderThickness="0">
                     <!--<DataGrid x:Name="result" SelectionChanged="SelectionChanged"></DataGrid>-->
                     <Grid>
-                        <ListView x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectionChanged="GamesList_SelectionChanged" ItemsSource="{Binding GameListViewItems}">
+                        <ListView x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectedItem="{Binding SelectedGame}" SelectionChanged="GamesList_SelectionChanged" ItemsSource="{Binding GameListViewItems}">
                             <ListView.Style>
                                 <Style TargetType="ListView">
                                     <Setter Property="Background" Value="#24282f"></Setter>
@@ -193,8 +194,8 @@
                         <Grid.RowDefinitions>
                             <!--<RowDefinition Height="30" />-->
                             <RowDefinition Height="124" />
-                            <RowDefinition Height="50" />
                             <RowDefinition Height="*" />
+                            <!--<RowDefinition Height="*" />-->
 
                         </Grid.RowDefinitions>
 
@@ -217,19 +218,131 @@
                         <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="DarkOliveGreen">
 
                             <TabControl>
-                                <TabItem Header="User Achievements"></TabItem>
-                                <TabItem Header="Global Achievements"></TabItem>
-                                <TabItem Header="User Statistics"></TabItem>
+                                <TabItem Header="User Achievements">
+
+                                    <ListView Background="#111923" x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ListViewItem}">
+                                                <Setter Property="Focusable" Value="False"/>
+                                                <Setter Property="ContentTemplate">
+                                                    <Setter.Value>
+                                                        <DataTemplate>
+                                                            <Grid Margin="5">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="auto"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Image Grid.Column="0" Source="{Binding Path=CurrentIcon}" Width="64" Height="64"></Image>
+                                                                <Grid Grid.Column="1" Margin="15,0,0,0" Background="#080c11" HorizontalAlignment="Stretch">
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="auto"/>
+                                                                        <RowDefinition Height="auto"/>
+                                                                    </Grid.RowDefinitions>
+
+                                                                    
+                                                                    <TextBlock Margin="10,10,0,0" Foreground="#e1e1e1" FontSize="16" Grid.Row="0" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
+                                                                    <TextBlock Margin="10,0,0,0" Foreground="#898989" FontSize="13" Grid.Row="1" Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
+                                                                </Grid>
+                                                                
+
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        
+                                    </ListView>
+
+
+
+
+                                </TabItem>
+                                <TabItem Header="Global Achievements">
+                                    <ListView HorizontalContentAlignment="Stretch" Background="#111923" ItemsSource="{Binding GlobalAchievements}" >
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ListViewItem}">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Focusable" Value="False"/>
+                                                <Setter Property="Focusable" Value="False"/>
+                                                <Setter Property="ContentTemplate">
+                                                    <Setter.Value>
+                                                        <DataTemplate>
+                                                            <DockPanel LastChildFill="True" Margin="5">
+
+                                                                <Image DockPanel.Dock="Left" Width="64" Height="64" Source="{Binding Icon, FallbackValue=https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png}"></Image>
+
+                                                                <Border BorderBrush="#17435c" BorderThickness="1" Margin="15, 0, 0, 0" >
+                                                                    <Grid>
+                                                                        <ProgressBar Padding="56" Minimum="0" Maximum="100" Value="{Binding Percent}" Foreground="#17435c" Background="#111923" BorderBrush="Transparent" BorderThickness="0" Margin="2,2,2,2"></ProgressBar>
+                                                                        <Label Name="progLabel" Margin="0,0,10,0" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Percent, Converter={StaticResource percentageConverter}}" Foreground="#63bbed" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" FontSize="16"/>
+
+                                                                        <Grid Margin="10,0,0,10" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+                                                                            <Grid.RowDefinitions>
+                                                                                <RowDefinition Height="auto"/>
+                                                                                <RowDefinition Height="auto"/>
+                                                                            </Grid.RowDefinitions>
+                                                                            <TextBlock FontSize="16" Grid.Row="0" Foreground="#c1d2d5" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
+                                                                            <TextBlock Grid.Row="1" FontSize="13" Foreground="#8f8d88" Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DockPanel>
+                                                        </DataTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+
+                                            
+                                            
+                                            
+                                        </ListView.ItemContainerStyle>
+
+
+                                    </ListView>
+
+                                </TabItem>
+                                <TabItem Header="User Statistics">
+
+                                    <DataGrid ItemsSource="{Binding UserStatisticList}" AutoGenerateColumns="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="StatName" Binding="{Binding DisplayName}"></DataGridTextColumn>
+                                            <DataGridTextColumn Header="Value" Binding="{Binding UserValue}"></DataGridTextColumn>
+                                        </DataGrid.Columns>
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                    </DataGrid>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                </TabItem>
                                 <TabItem Header="Global Statistics"></TabItem>
                             </TabControl>
-                            
-                            
-                            
-                            
+
+
+
+
                         </Grid>
                         <!--<Image Grid.Row="0" Source="https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png" Name="gameScreen" Height="172" Width="368" />-->
-                        <Grid Grid.Row="2" HorizontalAlignment="Stretch">
-                            <ListView x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
+                        <!--<Grid Grid.Row="2" HorizontalAlignment="Stretch">-->
+                        <!--<ListView x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="{x:Type ListViewItem}">
                                         <Setter Property="Focusable" Value="False"/>
@@ -243,7 +356,9 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <Image Grid.Column="0" Source="{Binding Path=CurrentIcon}" Width="64" Height="64"></Image>
-                                                        <!--<TextBlock Grid.Column="1" Text="{Binding }" Foreground="#a1a8b7" FontSize="14" Padding="2" Margin="1" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>-->
+                                                        -->
+                        <!--<TextBlock Grid.Column="1" Text="{Binding }" Foreground="#a1a8b7" FontSize="14" Padding="2" Margin="1" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>-->
+                        <!--
                                                         <Grid Grid.Column="1" Margin="5" Background="AliceBlue" HorizontalAlignment="Stretch">
                                                             <Grid.RowDefinitions>
                                                                 <RowDefinition Height="auto"/>
@@ -265,12 +380,14 @@
                                     </Style>
                                 </ListView.ItemContainerStyle>
 
-                                <!--<ListViewItem></ListViewItem>
+                                -->
+                        <!--<ListViewItem></ListViewItem>
                                 <ListViewItem></ListViewItem>
                                 <ListViewItem></ListViewItem>-->
+                        <!--
 
-                            </ListView>
-                        </Grid>
+                            </ListView>-->
+                        <!--</Grid>-->
                     </Grid>
 
                     <!--<TextBox x:Name="notes" Padding="5" AcceptsReturn="True" TextWrapping="Wrap" />-->
@@ -283,5 +400,5 @@
         </Grid>
 
 
-        </DockPanel>
+    </DockPanel>
 </Window>
