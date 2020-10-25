@@ -1,9 +1,11 @@
-﻿namespace GamePlatformsClient.Model
+﻿using System;
+
+namespace GamePlatformsClient.Model
 {
     public class Statistic
     {
         public string Name { get; set; }
-        public int DefaultValue { get; set; }
+        public Int64 DefaultValue { get; set; }
         public string DisplayName { get; set; } 
 
 

@@ -48,33 +48,51 @@ namespace GamePlatformsClient
             }
         }
 
-        //private ObservableCollection<GameListViewItem> _gameListViewItems = new ObservableCollection<GameListViewItem>();
-        public ObservableCollection<GameListViewItem> GameListViewItems { get; set; } = new ObservableCollection<GameListViewItem>();
+        private string _gameSearchText = "";
+        public string GameSearchText 
+        { 
+            get
+            {
+                return _gameSearchText;
+            }
+            set
+            {
+                _gameSearchText = value;
+                GameSearchTextChanged(_gameSearchText);
+                OnPropertyChanged();
+            }
+        }
+
+        public List<GameListViewItem> GameListViewItemsBase { get; set; } = new List<GameListViewItem>();
+        public ObservableCollection<GameListViewItem> GameListViewItemsFinal { get; set; } = new ObservableCollection<GameListViewItem>();
         public IEnumerable<Achievement> Achievements { get; set; }// = new IEnumerable<Achievement>();
         public IEnumerable<Statistic> Statistics { get; set; }// = new List<Statistic>();
         public ObservableCollection<UserAchievement> UserAchievementList { get; set; } = new ObservableCollection<UserAchievement>();
         public ObservableCollection<UserStatistic> UserStatisticList { get; set; } = new ObservableCollection<UserStatistic>();
         public ObservableCollection<GlobalAchievement> GlobalAchievements { get; set; } = new ObservableCollection<GlobalAchievement>();
 
+        public bool HasGameAchievements { get; set; } = false;
+        public bool HasGameStats { get; set; } = false;
+        public bool HasUserAchievements { get; set; } = false;
+        public bool HasUserStats { get; set; } = false;
+        public bool HasGlobalAchievements { get; set; } = false;
+        public bool HasGlobalStats { get; set; } = false;
 
 
         public GameListViewItem SelectedGame { get; set; }
-
-        //public string GetLoadStatusInfo()
-        //{
-        //    return loadStatusInfo;
-        //}
-
-        //public void SetLoadStatusInfo(string value)
-        //{
-        //    loadStatusInfo = value;
-        //}
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        private string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/9/header.jpg";
+        private CancellationTokenSource cancellationTokenSource = null;
+        private CancellationTokenSource cancellationTokenSourceSelectionChanged = null;
+
+
+
 
 
         public MainWindow()
@@ -95,8 +113,6 @@ namespace GamePlatformsClient
                 LoadStatusInfo = ex.ToString();
             }
         }
-
-        CancellationTokenSource cancellationTokenSource = null;
 
         public async Task GetInfo()
         {
@@ -140,44 +156,24 @@ namespace GamePlatformsClient
 
                 GetOwnedGamesData.Rootobject getOwnedGamesData = await steamService.GetOwnedGamesData(playerId, cancellationTokenSource.Token);
 
-                //listView.ClearValue(ItemsControl.ItemsSourceProperty);
-
                 List<GameListViewItem> playerGames = new List<GameListViewItem>();
 
                 await Task.Run(() =>
                 {
-                    //Dispatcher.Invoke(() =>
-                    //{
-                    //    foreach (var element in getOwnedGamesData.Response.Games)
-                    //    {
-                    //        playerGames.Add(new GameListViewItem()
-                    //        {
-                    //            Id = element.Appid,
-                    //            GameTitle = element.Name,
-                    //            GameIcon = $"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{element.Appid}/{element.Img_icon_url}.jpg"
-                    //        });
-                    //    }
-
-                    //    listView.ItemsSource = playerGames.OrderBy(x => x.GameTitle).ToList();
-                    //    listView.SelectedIndex = 0;
-
-                    //});
-
-                    //GameListViewItems = new ObservableCollection<GameListViewItem>
-
-
                     Dispatcher.Invoke(() =>
                     {
-                        GameListViewItems.Clear();
+                        GameListViewItemsBase.Clear();
                         
-                        GameListViewItems = new ObservableCollection<GameListViewItem>((getOwnedGamesData.Response.Games.Select(element => new GameListViewItem()
+                        GameListViewItemsBase = new List<GameListViewItem>((getOwnedGamesData.Response.Games.Select(element => new GameListViewItem()
                         {
                             Id = element.Appid,
                             GameTitle = element.Name,
                             GameIcon = $"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{element.Appid}/{element.Img_icon_url}.jpg"
                         }).OrderBy(x => x.GameTitle)));
 
-                        SelectedGame = GameListViewItems.First();
+                        SelectedGame = GameListViewItemsBase.First();
+
+                        SetGameList(GameSearchText);
                     });
                 }, cancellationTokenSource.Token);
 
@@ -203,13 +199,6 @@ namespace GamePlatformsClient
             }
         }
 
-
-        string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/9/header.jpg";
-        CancellationTokenSource cancellationTokenSourceSelectionChanged = null;
-
-
-
-
         private async void GamesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cancellationTokenSourceSelectionChanged != null)
@@ -228,6 +217,8 @@ namespace GamePlatformsClient
                     return;
                 }
 
+                ResetResults();
+
                 #region game miniature
 
                 GameListViewItem selectedItem = (GameListViewItem)((ListView)sender).SelectedItem;
@@ -241,144 +232,156 @@ namespace GamePlatformsClient
 
                 #region achievements and stats
 
-                {
-                    GetSchemaForGameData.Rootobject gameData = await steamService.GetSchemaForGameData(selectedItem.Id.ToString(), cancellationToken);
-                    UserAchievementList.Clear();
-                    UserStatisticList.Clear();
+                GetSchemaForGameData.Rootobject gameData = await steamService.GetSchemaForGameData(selectedItem.Id.ToString(), cancellationToken);
+                HasGameAchievements = gameData.Game.AvailableGameStats != null && gameData.Game.AvailableGameStats.Achievements != null;
+                HasGameStats = gameData.Game.AvailableGameStats != null && gameData.Game.AvailableGameStats.Stats != null;
 
-                    if (gameData.Game.AvailableGameStats != null)
+                
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (HasGameAchievements)
+                { 
+                    await Task.Run(() =>
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                        if (gameData.Game.AvailableGameStats.Achievements != null)
+                        Dispatcher.Invoke(() =>
                         {
-                            await Task.Run(() => 
-                            {
-                                Dispatcher.Invoke(() => 
+                            Achievements = gameData.Game.AvailableGameStats.Achievements.Select(x =>
+                                new Achievement()
                                 {
-                                    Achievements = gameData.Game.AvailableGameStats.Achievements.Select(x =>
-                                        new Achievement()
-                                        {
-                                            ApiName = x.Name,
-                                            DisplayName = x.DisplayName,
-                                            Description = x.Description,
-                                            Icongray = x.Icongray,
-                                            Icon = x.Icon
-                                        }).OrderBy(x => x.DisplayName);
-                                });
-                            }, cancellationToken);
-                        }
-                        cancellationToken.ThrowIfCancellationRequested();
+                                    ApiName = x.Name,
+                                     DisplayName = x.DisplayName,
+                                    Description = x.Description,
+                                    Icongray = x.Icongray,
+                                    Icon = x.Icon
+                                }).OrderBy(x => x.DisplayName);
+                        });
+                    }, cancellationToken);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
 
-                        if (gameData.Game.AvailableGameStats.Stats != null)
+
+                if (HasGameStats)
+                {
+                    await Task.Run(() =>
+                    {
+                        Dispatcher.Invoke(() =>
                         {
-                            await Task.Run(() =>
-                            {
-                                Dispatcher.Invoke(() =>
+                            Statistics = gameData.Game.AvailableGameStats.Stats.Select(x =>
+                                new Statistic()
                                 {
-                                    Statistics = gameData.Game.AvailableGameStats.Stats.Select(x =>
-                                        new Statistic()
-                                        {
-                                            Name = x.Name,
-                                            DisplayName = x.DisplayName,
-                                            DefaultValue = x.Defaultvalue
-                                        }).OrderBy(x => x.DisplayName);
-                                });
-                            }, cancellationToken);
-                        }
+                                    Name = x.Name,
+                                    DisplayName = x.DisplayName,
+                                    DefaultValue = x.Defaultvalue
+                                }).OrderBy(x => x.DisplayName);
+                        });
+                    }, cancellationToken);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                #endregion
+
+                #region user achievements
+
+                if (HasGameAchievements)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    GetPlayerAchievementsData.Rootobject achievementsData = await steamService.GetPlayerAchievementsData(playerId, selectedItem.Id.ToString(), cancellationToken);
+                    HasUserAchievements = achievementsData.Playerstats.Achievements != null;
+
+                    if (HasUserAchievements)
+                    {
+                        await Task.Run(() =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                UserAchievementList = new ObservableCollection<UserAchievement>(Achievements.Select(x => new UserAchievement(x)).ToList());
+
+                                foreach (var element in achievementsData.Playerstats.Achievements)
+                                {
+                                    UserAchievement ach = UserAchievementList.FirstOrDefault(x => x.ApiName == element.Apiname);
+                                    if (ach != null)
+                                    {
+                                        ach.Achieved = element.Achieved == 0;
+                                        ach.CurrentIcon = element.Achieved == 0 ? ach.Icongray : ach.Icon;
+                                    }
+                                }
+                            });
+                        }, cancellationToken);
+
+                        UserAchievementList = new ObservableCollection<UserAchievement>(UserAchievementList.OrderBy(x => x.Achieved));
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                 }
 
                 #endregion
 
-                #region user achievements
-
-                cancellationToken.ThrowIfCancellationRequested();  
-                GetPlayerAchievementsData.Rootobject achievementsData = await steamService.GetPlayerAchievementsData(playerId, selectedItem.Id.ToString(), cancellationToken);
-
-                await Task.Run(() => 
-                {
-                    Dispatcher.Invoke(() => 
-                    {
-                        UserAchievementList = new ObservableCollection<UserAchievement>(Achievements.Select(x => new UserAchievement(x)).ToList());
-
-                        foreach (var element in achievementsData.Playerstats.Achievements)
-                        {
-                            UserAchievement ach = UserAchievementList.FirstOrDefault(x => x.ApiName == element.Apiname);
-                            if (ach != null)
-                            {
-                                ach.Achieved = element.Achieved == 0;
-                                ach.CurrentIcon = element.Achieved == 0 ? ach.Icongray : ach.Icon;
-                            }
-                        }
-                    });
-                }, cancellationToken);
-
-                UserAchievementList = new ObservableCollection<UserAchievement>(UserAchievementList.OrderBy(x => x.Achieved));
-                cancellationToken.ThrowIfCancellationRequested();
-
-                #endregion
-
                 #region user stats
 
-                cancellationToken.ThrowIfCancellationRequested();
-                GetUserStatsForGameData.Rootobject statsData = await steamService.GetUserStatsForGame(playerId, selectedItem.Id.ToString(), cancellationToken);
+                if (HasGameStats)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    GetUserStatsForGameData.Rootobject statsData = await steamService.GetUserStatsForGame(playerId, selectedItem.Id.ToString(), cancellationToken);
+                    HasUserStats = statsData.Playerstats.Stats != null;
 
-                if (statsData.Playerstats.Stats != null)
-                    await Task.Run(() =>
+                    if (HasUserStats)
                     {
-                        Dispatcher.Invoke(() =>
+                        await Task.Run(() =>
                         {
-                            UserStatisticList = new ObservableCollection<UserStatistic>(Statistics.Select(x => new UserStatistic(x)).ToList());
-
-                            foreach (var element in statsData.Playerstats.Stats)
+                            Dispatcher.Invoke(() =>
                             {
-                                UserStatistic stat = UserStatisticList.FirstOrDefault(x => x.Name == element.Name);
-                                if (stat != null)
+                                UserStatisticList = new ObservableCollection<UserStatistic>(Statistics.Select(x => new UserStatistic(x)).ToList());
+
+                                foreach (var element in statsData.Playerstats.Stats)
                                 {
-                                    stat.UserValue = element.Value;
+                                    UserStatistic stat = UserStatisticList.FirstOrDefault(x => x.Name == element.Name);
+                                    if (stat != null)
+                                    {
+                                        stat.UserValue = element.Value;
+                                    }
                                 }
-                            }
-                        });
-                    }, cancellationToken);
+                            });
+                        }, cancellationToken);
 
-                cancellationToken.ThrowIfCancellationRequested();
-
-                #endregion
-
-                #region global stats
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-
-
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }
 
                 #endregion
+
+                //#region global stats
+                //cancellationToken.ThrowIfCancellationRequested();
+                //#endregion
 
                 #region global achievements
 
-                cancellationToken.ThrowIfCancellationRequested();
-                GetGlobalAchievementPercentagesForAppData.Rootobject globalAchievementsData = await steamService.GetGlobalAchievementPercentagesForAppData(selectedItem.Id.ToString(), cancellationToken);
-
-                await Task.Run(() =>
+                if (HasGameAchievements)
                 {
-                    Dispatcher.Invoke(() =>
+                    cancellationToken.ThrowIfCancellationRequested();
+                    GetGlobalAchievementPercentagesForAppData.Rootobject globalAchievementsData = await steamService.GetGlobalAchievementPercentagesForAppData(selectedItem.Id.ToString(), cancellationToken);
+                    HasGlobalAchievements = globalAchievementsData != null;
+
+                    if (HasGlobalAchievements)
                     {
-                        GlobalAchievements = new ObservableCollection<GlobalAchievement>(Achievements.Select(x => new GlobalAchievement(x)).ToList());
-
-                        foreach (var element in globalAchievementsData.Achievementpercentages.Achievements)
+                        await Task.Run(() =>
                         {
-                            GlobalAchievement ach = GlobalAchievements.FirstOrDefault(x => x.ApiName == element.Name);
-                            if (ach != null)
+                            Dispatcher.Invoke(() =>
                             {
-                                ach.Percent = element.Percent;
-                            }
-                        }
-                    });
-                }, cancellationToken);
+                                GlobalAchievements = new ObservableCollection<GlobalAchievement>(Achievements.Select(x => new GlobalAchievement(x)).ToList());
 
-                GlobalAchievements = new ObservableCollection<GlobalAchievement>(GlobalAchievements.OrderBy(x => x.Percent).Reverse());
+                                foreach (var element in globalAchievementsData.Achievementpercentages.Achievements)
+                                {
+                                    GlobalAchievement ach = GlobalAchievements.FirstOrDefault(x => x.ApiName == element.Name);
+                                    if (ach != null)
+                                    {
+                                        ach.Percent = element.Percent;
+                                    }
+                                }
+                            });
+                        }, cancellationToken);
+                        GlobalAchievements = new ObservableCollection<GlobalAchievement>(GlobalAchievements.OrderBy(x => x.Percent).Reverse());
+                    }
+                }
 
                 #endregion
 
@@ -403,22 +406,35 @@ namespace GamePlatformsClient
             }
         }
 
+        private void ResetResults()
+        {
+            UserAchievementList.Clear();
+            GlobalAchievements.Clear();
+            UserStatisticList.Clear();
 
+            HasGameAchievements = false;
+            HasGameStats = false;
+            HasUserAchievements = false;
+            HasUserStats = false;
+            HasGlobalAchievements = false;
+            HasGlobalStats = false;
+        }
 
+        private void GameSearchTextChanged(string searchGameText)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                SetGameList(searchGameText);
+            });
+        }
 
-        //private void SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    var selectedItem = (SteamResponseData.App)result.SelectedItem;
-
-
-        //    Uri resourceUri = new Uri(gameHeaderURI.Replace("9", selectedItem.Appid.ToString()));
-        //    gameMiniature.Source = new BitmapImage(resourceUri);
-
-        //}
-
+        private void SetGameList(string searchGameText)
+        {
+            GameListViewItemsFinal.Clear();
+            IEnumerable<GameListViewItem> list = GameListViewItemsBase.Where(x => x.GameTitle.Contains(searchGameText, StringComparison.InvariantCultureIgnoreCase));
+            GameListViewItemsFinal = new ObservableCollection<GameListViewItem>(list);
+        }
     }
-
-
 
 
 
@@ -462,57 +478,4 @@ namespace GamePlatformsClient
             }
         }
     }
-
-
-
-    //public class GameListViewItem: INotifyPropertyChanged
-    //{
-    //    private uint _id;
-    //    public uint Id 
-    //    {
-    //        get
-    //        {
-    //            return _id;
-    //        }
-    //        set
-    //        {
-    //            _id = value;
-    //            OnPropertyChanged("Id");
-    //        }
-    //    }
-
-    //    private string _gameTitle;
-    //    public string GameTitle 
-    //    {
-    //        get
-    //        {
-    //            return _gameTitle;
-    //        }
-    //        set
-    //        {
-    //            _gameTitle = value;
-    //            OnPropertyChanged("GameTitle");
-    //        }
-    //    }
-    //    private string _gameIcon;
-    //    public string GameIcon 
-    //    {
-    //        get
-    //        {
-    //            return _gameIcon;
-    //        }
-    //        set
-    //        {
-    //            _gameIcon = value;
-    //            OnPropertyChanged("GameIcon");
-    //        }
-    //    }
-
-    //    public event PropertyChangedEventHandler PropertyChanged;
-
-    //    protected void OnPropertyChanged(string name = null)
-    //    {
-    //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    //    }
-    //}
 }
