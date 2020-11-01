@@ -29,7 +29,7 @@ namespace GamePlatformsClient.Model.SteamResponseData
         public class Stat
         {
             [JsonPropertyName("name")] public string Name { get; set; }
-            [JsonPropertyName("value")] public int Value { get; set; }
+            [JsonPropertyName("value")] public float Value { get; set; }
         }
 
     }

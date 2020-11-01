@@ -35,7 +35,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="100" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" Padding="3" Margin="0 0 20 0" x:Name="nickname" BorderThickness="0" Background="#212328" Foreground="#ebeae9">
+                    <TextBox VerticalAlignment="Center" Grid.Column="0" Padding="3" Margin="0 0 20 0" x:Name="nickname" BorderThickness="0" Background="#212328" Foreground="#ebeae9">
                         DonRobsone
                     </TextBox>
                     <Button x:Name="send" Grid.Column="1" Click="Send_Click">Send</Button>
@@ -43,95 +43,99 @@
             </GroupBox>
 
             <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="263*"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions >
                     <ColumnDefinition Width="280"/>
                     <!--<ColumnDefinition Width="200" />-->
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <GroupBox Padding="0" BorderThickness="0">
+                <GroupBox Padding="0" BorderThickness="0" Grid.RowSpan="2">
                     <!--<DataGrid x:Name="result" SelectionChanged="SelectionChanged"></DataGrid>-->
-                    
+
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="25"></RowDefinition>
                             <RowDefinition Height="*"></RowDefinition>
                         </Grid.RowDefinitions>
 
-
-                        <TextBox Grid.Row="0" Text="{Binding GameSearchText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        
+                        <TextBox Grid.Row="0" Text="{Binding GameSearchText, UpdateSourceTrigger=PropertyChanged, FallbackValue=Test}" VerticalAlignment="Center" TextAlignment="Left" Margin="4,0,4,0"></TextBox>
                         <ListView Grid.Row="1" x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectedItem="{Binding SelectedGame}" SelectionChanged="GamesList_SelectionChanged" ItemsSource="{Binding GameListViewItemsFinal}">
-                        <ListView.Style>
-                            <Style TargetType="ListView">
-                                <Setter Property="Background" Value="#24282f"></Setter>
-                            </Style>
-                        </ListView.Style>
+                            <ListView.Style>
+                                <Style TargetType="ListView">
+                                    <Setter Property="Background" Value="#24282f"></Setter>
+                                </Style>
+                            </ListView.Style>
 
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="{x:Type ListViewItem}">
-                                <Setter Property="Background" Value="#24282f"/>
-                                <Setter Property="BorderBrush" Value="#24282f"/>
-                                <Setter Property="BorderThickness" Value="0"/>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Setter Property="Background" Value="#24282f"/>
+                                    <Setter Property="BorderBrush" Value="#24282f"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
 
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                            <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                <Border BorderBrush="{TemplateBinding BorderBrush}" 
                                                     BorderThickness="{TemplateBinding BorderThickness}" 
                                                     Background="{TemplateBinding Background}">
-                                                <Border x:Name="InnerBorder" BorderThickness="0" >
-                                                    <Grid>
-                                                        <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}">
-                                                        </ContentPresenter>
-                                                    </Grid>
+                                                    <Border x:Name="InnerBorder" BorderThickness="0" >
+                                                        <Grid>
+                                                            <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}">
+                                                            </ContentPresenter>
+                                                        </Grid>
+                                                    </Border>
                                                 </Border>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="true">
-                                                    <Setter Property="Background" Value="#323a4b"/>
-                                                    <Setter Property="BorderBrush" Value="#323a4b"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="true">
-                                                    <Setter Property="Background" Value="#3e4e69"/>
-                                                    <Setter Property="BorderBrush" Value="#3e4e69"/>
-                                                    <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#3e4e69"/>
-                                                </Trigger>
-                                                <!--<Trigger Property="IsEnabled" Value="false">
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="true">
+                                                        <Setter Property="Background" Value="#323a4b"/>
+                                                        <Setter Property="BorderBrush" Value="#323a4b"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="true">
+                                                        <Setter Property="Background" Value="#3e4e69"/>
+                                                        <Setter Property="BorderBrush" Value="#3e4e69"/>
+                                                        <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#3e4e69"/>
+                                                    </Trigger>
+                                                    <!--<Trigger Property="IsEnabled" Value="false">
                                                         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                                 </Trigger>-->
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter Property="ContentTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <Grid Margin="0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <Grid Margin="0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                <Image Grid.Column="0" Source="{Binding GameIcon}" Width="20" Height="20"></Image>
-                                                <TextBlock Grid.Column="1" Text="{Binding GameTitle, FallbackValue='GameTitle'}" Foreground="#a1a8b7" FontSize="14" Padding="2" Margin="1" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
+                                                    <Image Grid.Column="0" Source="{Binding GameIcon}" Width="20" Height="20"></Image>
+                                                    <TextBlock Grid.Column="1" Text="{Binding GameTitle, FallbackValue='GameTitle'}" Foreground="#a1a8b7" FontSize="14" Padding="2" Margin="1" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
 
-                                            </Grid>
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListView.ItemContainerStyle>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
 
-                    </ListView>
-                   
-                        
-                        
-                        
+                        </ListView>
+
+
+
+
                     </Grid>
 
                 </GroupBox>
 
-                <GroupBox Padding="0" Grid.Column="2" BorderThickness="0">
-                    <Grid Background="LightGray">
+                <GroupBox Padding="0" Grid.Column="1" BorderThickness="0" Grid.RowSpan="2">
+                    <Grid Background="Transparent">
                         <Grid.RowDefinitions>
                             <!--<RowDefinition Height="30" />-->
                             <RowDefinition Height="124" />
@@ -154,11 +158,106 @@
 
                                 </Label.Content>
                             </Label>
-                            <Image Grid.Column="1" Source="https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png" Name="gameScreen" Height="114" Width="244"  />
+                            <Image Grid.Column="1" Name="gameScreen" Height="114" Width="244"/>
                         </Grid>
                         <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="Transparent">
 
                             <TabControl Background="#282f38" BorderThickness="0">
+                                <TabControl.ItemContainerStyle>
+                                    <Style TargetType="{x:Type TabItem}">
+                                        <!--<Setter Property="Background" Value="#282f37"></Setter>
+                                        <Setter Property="TextBlock.FontWeight" Value="Regular"></Setter>
+                                        <Setter Property="TextBlock.Foreground" Value="White"></Setter>-->
+
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TabItem">
+                                                    <Border x:Name="Border" BorderThickness="1,1,1,0" BorderBrush="Transparent" CornerRadius="4,4,4,4" Margin="2,0">
+                                                        <ContentPresenter x:Name="ContentSite"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Center"
+                                                            ContentSource="Header"
+                                                            Margin="10,2"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        
+                                                        
+                                                        
+                                                        <Trigger Property="IsSelected" Value="False">
+                                                            <Setter TargetName="Border" Property="Background" Value="#282f37" />
+                                                            <Setter Property="TextBlock.FontWeight" Value="Light"></Setter>
+                                                            <Setter Property="TextBlock.Foreground" Value="White"></Setter>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="#535b5f"></Setter>
+                                                        </Trigger>
+
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="#7f888e" />
+                                                            <Setter Property="TextBlock.FontWeight" Value="Regular"></Setter>
+                                                            <Setter Property="TextBlock.Foreground" Value="White"></Setter>
+                                                        </Trigger>
+
+
+
+                                                        <Trigger Property="IsEnabled" Value="false">
+                                                            <Setter TargetName="Border" Property="Background" Value="Transparent"></Setter>
+                                                            <Setter Property="TextBlock.Foreground" Value="Transparent"></Setter>
+                                                        </Trigger>
+
+
+
+
+
+
+
+
+
+
+
+                                                    </ControlTemplate.Triggers>
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                </ControlTemplate>
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                            </Setter.Value>
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                        </Setter>
+                                        
+                                    </Style>
+                                </TabControl.ItemContainerStyle>
+                                
+
                                 <TabItem Header="User Achievements" IsEnabled="{Binding HasUserAchievements}">
 
                                     <ListView BorderThickness="0" Background="#111923" x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
@@ -198,11 +297,11 @@
                                                                         <RowDefinition Height="auto"/>
                                                                     </Grid.RowDefinitions>
 
-                                                                    
+
                                                                     <TextBlock Margin="10,10,0,0" Foreground="#e1e1e1" FontSize="16" Grid.Row="0" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
                                                                     <TextBlock Margin="10,0,0,0" Foreground="#898989" FontSize="13" Grid.Row="1" Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
                                                                 </Grid>
-                                                                
+
 
                                                             </Grid>
                                                         </DataTemplate>
@@ -210,7 +309,7 @@
                                                 </Setter>
                                             </Style>
                                         </ListView.ItemContainerStyle>
-                                        
+
                                     </ListView>
 
 
@@ -268,9 +367,9 @@
                                                 </Setter>
                                             </Style>
 
-                                            
-                                            
-                                            
+
+
+
                                         </ListView.ItemContainerStyle>
 
 
@@ -284,28 +383,28 @@
                                             <DataGridTextColumn Header="StatName" Binding="{Binding DisplayName}"></DataGridTextColumn>
                                             <DataGridTextColumn Header="Value" Binding="{Binding UserValue}"></DataGridTextColumn>
                                         </DataGrid.Columns>
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
+
+
+
+
+
+
                                     </DataGrid>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                                 </TabItem>
                                 <!--<TabItem Header="Global Statistics"></TabItem>-->
                             </TabControl>

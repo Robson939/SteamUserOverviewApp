@@ -33,7 +33,7 @@ namespace GamePlatformsClient
     {
         public static string playerId;
 
-        ISteamService steamService;
+        private ISteamService steamService;
         private string _loadStatusInfo = "";
         public string LoadStatusInfo 
         {
@@ -78,21 +78,18 @@ namespace GamePlatformsClient
         public bool HasGlobalAchievements { get; set; } = false;
         public bool HasGlobalStats { get; set; } = false;
 
-
         public GameListViewItem SelectedGame { get; set; }
+
+        private readonly string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/9/header.jpg";
+        private CancellationTokenSource cancellationTokenSource = null;
+        private CancellationTokenSource cancellationTokenSourceSelectionChanged = null;
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
-        private string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/9/header.jpg";
-        private CancellationTokenSource cancellationTokenSource = null;
-        private CancellationTokenSource cancellationTokenSourceSelectionChanged = null;
-
-
-
 
 
         public MainWindow()
@@ -209,7 +206,6 @@ namespace GamePlatformsClient
             cancellationTokenSourceSelectionChanged = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSourceSelectionChanged.Token;
 
-
             try
             {
                 if (((ListView)sender).Items == null || ((ListView)sender).Items.Count == 0)
@@ -223,7 +219,6 @@ namespace GamePlatformsClient
 
                 GameListViewItem selectedItem = (GameListViewItem)((ListView)sender).SelectedItem;
 
-
                 AccessText accessText = gameTitleLabel.Content as AccessText;
                 accessText.Text = selectedItem.GameTitle;
                 gameScreen.Source = new BitmapImage(new Uri(gameHeaderURI.Replace("9", selectedItem.Id.ToString())));
@@ -235,8 +230,6 @@ namespace GamePlatformsClient
                 GetSchemaForGameData.Rootobject gameData = await steamService.GetSchemaForGameData(selectedItem.Id.ToString(), cancellationToken);
                 HasGameAchievements = gameData.Game.AvailableGameStats != null && gameData.Game.AvailableGameStats.Achievements != null;
                 HasGameStats = gameData.Game.AvailableGameStats != null && gameData.Game.AvailableGameStats.Stats != null;
-
-                
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -250,7 +243,7 @@ namespace GamePlatformsClient
                                 new Achievement()
                                 {
                                     ApiName = x.Name,
-                                     DisplayName = x.DisplayName,
+                                    DisplayName = x.DisplayName,
                                     Description = x.Description,
                                     Icongray = x.Icongray,
                                     Icon = x.Icon
@@ -258,8 +251,8 @@ namespace GamePlatformsClient
                         });
                     }, cancellationToken);
                 }
-                cancellationToken.ThrowIfCancellationRequested();
 
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (HasGameStats)
                 {
@@ -283,9 +276,10 @@ namespace GamePlatformsClient
 
                 #region user achievements
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (HasGameAchievements)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
                     GetPlayerAchievementsData.Rootobject achievementsData = await steamService.GetPlayerAchievementsData(playerId, selectedItem.Id.ToString(), cancellationToken);
                     HasUserAchievements = achievementsData.Playerstats.Achievements != null;
 
@@ -318,9 +312,10 @@ namespace GamePlatformsClient
 
                 #region user stats
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (HasGameStats)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
                     GetUserStatsForGameData.Rootobject statsData = await steamService.GetUserStatsForGame(playerId, selectedItem.Id.ToString(), cancellationToken);
                     HasUserStats = statsData.Playerstats.Stats != null;
 
@@ -355,9 +350,10 @@ namespace GamePlatformsClient
 
                 #region global achievements
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (HasGameAchievements)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
                     GetGlobalAchievementPercentagesForAppData.Rootobject globalAchievementsData = await steamService.GetGlobalAchievementPercentagesForAppData(selectedItem.Id.ToString(), cancellationToken);
                     HasGlobalAchievements = globalAchievementsData != null;
 
@@ -408,6 +404,8 @@ namespace GamePlatformsClient
 
         private void ResetResults()
         {
+            Achievements = Enumerable.Empty<Achievement>();
+            Statistics = Enumerable.Empty<Statistic>();
             UserAchievementList.Clear();
             GlobalAchievements.Clear();
             UserStatisticList.Clear();

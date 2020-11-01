@@ -2,7 +2,7 @@
 {
     public class UserStatistic : Statistic
     {
-        public int UserValue { get; set; }
+        public float UserValue { get; set; }
 
         public UserStatistic(Statistic statistic) : base(statistic)
         {
