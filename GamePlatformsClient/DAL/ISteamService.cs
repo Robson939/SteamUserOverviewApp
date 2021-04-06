@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GamePlatformsClient.DAL
 {
-    interface ISteamService
+    public interface ISteamService
     {
         public Task<GetAppListData.Rootobject> GetAppListData(CancellationToken cancellationToken);
         public Task<GetOwnedGamesData.Rootobject> GetOwnedGamesData(string userSteamId, CancellationToken cancellationToken);

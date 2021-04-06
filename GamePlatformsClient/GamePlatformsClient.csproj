@@ -17,6 +17,7 @@
     <Compile Remove="DAL\IGetSchemaForGameRepository.cs" />
     <Compile Remove="DAL\IResolveVanityURLRepository.cs" />
     <Compile Remove="DAL\ResolveVanityURLRepository.cs" />
+    <Compile Remove="MainWindow.xaml.cs" />
     <Compile Remove="Model\SteamResponseData\Achievement.cs" />
     <Compile Remove="Model\SteamResponseData\App.cs" />
     <Compile Remove="Model\SteamResponseData\AppList.cs" />
@@ -41,6 +42,10 @@
     <None Remove="Fonts\Yantramanav-Medium.ttf" />
     <None Remove="Fonts\Yantramanav-Regular.ttf" />
     <None Remove="Fonts\Yantramanav-Thin.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="MainWindow.xaml" />
   </ItemGroup>
 
   <ItemGroup>

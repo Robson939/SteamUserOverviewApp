@@ -3,11 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:GamePlatformsClient"
              xmlns:converter="clr-namespace:GamePlatformsClient.Converter"
-             StartupUri="MainWindow.xaml">
+             StartupUri="View/MainPanelView.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <converter:DoNothingConverter x:Key="localDoNothingConverter"></converter:DoNothingConverter>
             <converter:PercentageConverter x:Key="percentageConverter"></converter:PercentageConverter>
+            <local:ViewModelLocator x:Key="mainViewModelLocator"></local:ViewModelLocator>
         </ResourceDictionary> 
         
     </Application.Resources>
