@@ -6,6 +6,7 @@
     xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
     xmlns:local="clr-namespace:GamePlatformsClient"
     xmlns:igWPF="http://schemas.infragistics.com/xaml/wpf" 
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     mc:Ignorable="d"
     DataContext="{Binding Source={StaticResource mainViewModelLocator}, Path=MainPanelViewModel}"
     Title="" Height="700" Width="1000" Margin="0" Padding="0" Background="#2a2e33"
@@ -18,7 +19,7 @@
                 <TextBlock Foreground="#ebeae9" Padding="0" x:Name="DataLoadStatus" Text="{Binding LoadStatusInfo, FallbackValue='Error', Mode=OneWay}"/>
             </StatusBarItem>
             <StatusBarItem>
-                <ProgressBar x:Name="ProgressBar" Width="200" Height="15" Visibility="Hidden"></ProgressBar>
+                <ProgressBar IsIndeterminate="True" Width="200" Height="15" Visibility="{Binding ProgressBarVisibility}"></ProgressBar>
             </StatusBarItem>
         </StatusBar>
 
@@ -36,27 +37,22 @@
                         <ColumnDefinition Width="100" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox VerticalAlignment="Center" Grid.Column="0" Padding="3" FontSize="14" Margin="0 0 20 0" x:Name="nickname" BorderThickness="0" Background="#25272d" Foreground="#ebeae9">
+                    <TextBox VerticalAlignment="Center" Text="{Binding Nickname, Mode=TwoWay}" Grid.Column="0" Padding="3" FontSize="14" Margin="0 0 20 0" x:Name="nickname" BorderThickness="0" Background="#25272d" Foreground="#ebeae9">
                         <TextBox.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="2"></Setter>
                             </Style>
                         </TextBox.Resources>
 
-                        DonRobsone
+                        
                     </TextBox>
                     <!--<Button x:Name="send" Grid.Column="1" Margin="10" Click="Send_Click">-->
-                        <Button x:Name="send" Grid.Column="1" Margin="10" >
-
-                            <Button.Resources>
+                    <Button Command="{Binding GetPlayerInfoCommand}" Content="{Binding SendButtonContent, Mode=TwoWay}" Grid.Column="1" Margin="10" >
+                        <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="5"></Setter>
-
                             </Style>
-
-
                         </Button.Resources>
-                        Send
                     </Button>
 
                 </Grid>
@@ -94,6 +90,13 @@
 
                         <ListView Grid.Row="1" Margin="0,5,0,0" x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectedItem="{Binding SelectedGame}" ItemsSource="{Binding GameListViewItemsFinal}">
                             <!--<ListView Grid.Row="1" Margin="0,5,0,0" x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectedItem="{Binding SelectedGame}" SelectionChanged="GamesList_SelectionChanged" ItemsSource="{Binding GameListViewItemsFinal}">-->
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding GamesListSelectionChanged}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+
                             <ListView.Style>
                                 <Style TargetType="ListView">
                                     <Setter Property="Background" Value="#24282f"></Setter>
@@ -112,7 +115,13 @@
                                                 <Border BorderBrush="{TemplateBinding BorderBrush}" 
                                                     BorderThickness="{TemplateBinding BorderThickness}" 
                                                     Background="{TemplateBinding Background}">
+                                                    
+                                                    
                                                     <Border x:Name="InnerBorder" BorderThickness="0" >
+                                                        
+                                                        
+                                                        
+                                                        
                                                         <Grid>
                                                             <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}">
                                                             </ContentPresenter>
@@ -120,6 +129,7 @@
                                                     </Border>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
+                                                    
                                                     <Trigger Property="IsMouseOver" Value="true">
                                                         <Setter Property="Background" Value="#323a4b"/>
                                                         <Setter Property="BorderBrush" Value="#323a4b"/>
@@ -139,6 +149,7 @@
                                     <Setter Property="ContentTemplate">
                                         <Setter.Value>
                                             <DataTemplate>
+                                                
                                                 <Grid Margin="0">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -184,12 +195,12 @@
 
                             <Label Grid.Column="0" Name="gameTitleLabel" FontSize="40" FontWeight="Bold" Background="#2a2e33">
                                 <Label.Content>
-                                    <AccessText  Foreground="#ebeae9" TextWrapping="Wrap" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale">
+                                    <AccessText Text="{Binding GameTitleLabel}" Foreground="#ebeae9" TextWrapping="Wrap" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale">
                                     </AccessText>
 
                                 </Label.Content>
                             </Label>
-                            <Image Grid.Column="1" Name="gameScreen" Height="auto" Width="auto" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
+                            <Image Grid.Column="1" Source="{Binding GameScreenSource}" Name="gameScreen" Height="auto" Width="auto" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
                         </Grid>
                         <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="Transparent">
 
