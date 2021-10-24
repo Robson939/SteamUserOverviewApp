@@ -18,6 +18,5 @@ namespace GamePlatformsClient
                 return mainPanelViewModel;
             }
         }
-    
     }
 }

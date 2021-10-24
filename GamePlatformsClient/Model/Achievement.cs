@@ -1,6 +1,6 @@
 ﻿namespace GamePlatformsClient.Model
 {
-    //to do ZAMIENIĆ NA INTERFEJS 
+    //todo: ZAMIENIĆ NA INTERFEJS 
     public class Achievement 
     {
         public string ApiName { get; set; }

@@ -8,6 +8,7 @@
         <ResourceDictionary>
             <converter:DoNothingConverter x:Key="localDoNothingConverter"></converter:DoNothingConverter>
             <converter:PercentageConverter x:Key="percentageConverter"></converter:PercentageConverter>
+            <converter:RowToIndexConverter x:Key="rowToIndexConverter"></converter:RowToIndexConverter>
             <local:ViewModelLocator x:Key="mainViewModelLocator"></local:ViewModelLocator>
         </ResourceDictionary> 
         

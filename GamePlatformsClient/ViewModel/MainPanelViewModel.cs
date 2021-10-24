@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Text;
 using GamePlatformsClient.Model.SteamResponseData;
 using GamePlatformsClient.Model;
-using GamePlatformsClient.DAL;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Windows;
@@ -17,14 +16,18 @@ using System.Net.Http;
 using System.Windows.Input;
 using GamePlatformsClient.Utility;
 using System.Windows.Media.Imaging;
+using System.Globalization;
 
 namespace GamePlatformsClient.ViewModel
 {
     public class MainPanelViewModel : INotifyPropertyChanged
     {
-        public static string playerId;
+        private readonly ISteamService steamService;
+        private string playerId;
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
-        private ISteamService steamService;
+        #region bindings
+
         private string _loadStatusInfo = "";
         public string LoadStatusInfo
         {
@@ -38,73 +41,11 @@ namespace GamePlatformsClient.ViewModel
                 OnPropertyChanged();
             }
         }
-
-        private string _nickname;
-        public string Nickname
-        {
-            get
-            {
-                return _nickname;
-            }
-            set
-            {
-                _nickname = value;
-            }
-        }
-
-        private BitmapImage _gameScreenSource;
-        public BitmapImage GameScreenSource
-        {
-            get
-            {
-                return _gameScreenSource;
-            }
-            set
-            {
-                _gameScreenSource = value;
-                OnPropertyChanged();
-            }
-        }
-
-
-        private Visibility _progressBarVisibility = Visibility.Hidden;
-        public Visibility ProgressBarVisibility
-        {
-            get { return _progressBarVisibility; }
-            set
-            {
-                _progressBarVisibility = value;
-                OnPropertyChanged();
-            }
-        }
-        private string _sendButtonContent = "Send";
-        public string SendButtonContent
-        {
-            get
-            {
-                return _sendButtonContent;
-            }
-            set
-            {
-                _sendButtonContent = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _gameTitleLabel;
-        public string GameTitleLabel
-        { 
-            get
-            {
-                return _gameTitleLabel;
-            }
-            set
-            {
-                _gameTitleLabel = value;
-            }
-        }
-
-
+        public string Nickname { get; set; }
+        public BitmapImage GameScreenSource { get; set; }
+        public Visibility ProgressBarVisibility { get; set; } = Visibility.Hidden;
+        public string SendButtonContent { get; set; } = "Send";
+        public string GameTitleLabel { get; set; }
         private string _gameSearchText = "";
         public string GameSearchText
         {
@@ -119,20 +60,25 @@ namespace GamePlatformsClient.ViewModel
                 OnPropertyChanged();
             }
         }
+        public GameListViewItem SelectedGame { get; set; }
 
-
-        //commands
-        public ICommand GetPlayerInfoCommand { get; set; }
-        public ICommand GamesListSelectionChanged { get; set; }
-
-
-        public List<GameListViewItem> GameListViewItemsBase { get; set; } = new List<GameListViewItem>();
         public ObservableCollection<GameListViewItem> GameListViewItemsFinal { get; set; } = new ObservableCollection<GameListViewItem>();
-        public IEnumerable<Achievement> Achievements { get; set; }
-        public IEnumerable<Statistic> Statistics { get; set; }
         public ObservableCollection<UserAchievement> UserAchievementList { get; set; } = new ObservableCollection<UserAchievement>();
         public ObservableCollection<UserStatistic> UserStatisticList { get; set; } = new ObservableCollection<UserStatistic>();
         public ObservableCollection<GlobalAchievement> GlobalAchievements { get; set; } = new ObservableCollection<GlobalAchievement>();
+
+        #endregion
+
+        #region commands
+
+        public ICommand GetPlayerInfoCommand { get; set; }
+        public ICommand GamesListSelectionChangedCommand { get; set; }
+
+        #endregion
+
+        public List<GameListViewItem> GameListViewItemsBase { get; set; } = new List<GameListViewItem>();
+        public IEnumerable<Achievement> Achievements { get; set; }
+        public IEnumerable<Statistic> Statistics { get; set; }
 
         public bool HasGameAchievements { get; set; } = false;
         public bool HasGameStats { get; set; } = false;
@@ -141,41 +87,29 @@ namespace GamePlatformsClient.ViewModel
         public bool HasGlobalAchievements { get; set; } = false;
         public bool HasGlobalStats { get; set; } = false;
 
-        public GameListViewItem SelectedGame { get; set; }
-
-        private readonly string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/9/header.jpg";
+        private string gameHeaderURI = "https://steamcdn-a.akamaihd.net/steam/apps/{GAMEID}/header.jpg";
+        private string gameIconURI = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{APPID}/{ICONURL}.jpg";
         private CancellationTokenSource cancellationTokenSource = null;
         private CancellationTokenSource cancellationTokenSourceSelectionChanged = null;
 
-
-
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string propertyChanged = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyChanged));
-        }
+
 
         public MainPanelViewModel(ISteamService steamService)
         {
             this.steamService = steamService;
 
             GetPlayerInfoCommand = new CustomCommand(GetPlayerInfo, null);
-            GamesListSelectionChanged = new CustomCommand(GamesList_SelectionChanged, null);
+            GamesListSelectionChangedCommand = new CustomCommand(GamesListSelectionChanged, null);
 
-            OnPropertyChanged();
+            //OnPropertyChanged();
         }
 
-        //private async void Send_Click(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        await GetInfo();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        LoadStatusInfo = ex.ToString();
-        //    }
-        //}
+        private void OnPropertyChanged(string propertyChanged = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyChanged));
+        }
+
         private async void GetPlayerInfo(object obj)
         {
             try
@@ -188,8 +122,7 @@ namespace GamePlatformsClient.ViewModel
             }
         }
 
-
-        public async Task GetInfo()
+        private async Task GetInfo()
         {
             ProgressBarVisibility = Visibility.Visible;
             SendButtonContent = "Cancel";
@@ -234,7 +167,7 @@ namespace GamePlatformsClient.ViewModel
 
                 await Task.Run(() =>
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
                         GameListViewItemsBase.Clear();
 
@@ -242,7 +175,7 @@ namespace GamePlatformsClient.ViewModel
                         {
                             Id = element.Appid,
                             GameTitle = element.Name,
-                            GameIcon = $"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{element.Appid}/{element.Img_icon_url}.jpg"
+                            GameIcon = gameIconURI.Replace("{APPID}", element.Appid.ToString()).Replace("{ICONURL}", element.Img_icon_url)
                         }).OrderBy(x => x.GameTitle)));
 
                         SelectedGame = GameListViewItemsBase.First();
@@ -273,8 +206,7 @@ namespace GamePlatformsClient.ViewModel
             }
         }
 
-        //private async void GamesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        private async void GamesList_SelectionChanged(object obj)
+        private async void GamesListSelectionChanged(object obj)
         {
             if (cancellationTokenSourceSelectionChanged != null)
             {
@@ -297,12 +229,10 @@ namespace GamePlatformsClient.ViewModel
 
                 GameListViewItem selectedItem = SelectedGame;
 
-                //AccessText accessText = gameTitleLabel.Content as AccessText;
                 GameTitleLabel = selectedItem.GameTitle;
 
 
-                //gameScreen.Source = new BitmapImage(new Uri(gameHeaderURI.Replace("9", selectedItem.Id.ToString())));
-                GameScreenSource = new BitmapImage(new Uri(gameHeaderURI.Replace("9", selectedItem.Id.ToString())));
+                GameScreenSource = new BitmapImage(new Uri(gameHeaderURI.Replace("{GAMEID}", selectedItem.Id.ToString())));
 
 
                 #endregion
@@ -319,7 +249,7 @@ namespace GamePlatformsClient.ViewModel
                 {
                     await Task.Run(() =>
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
                             Achievements = gameData.Game.AvailableGameStats.Achievements.Select(x =>
                                 new Achievement()
@@ -340,7 +270,7 @@ namespace GamePlatformsClient.ViewModel
                 {
                     await Task.Run(() =>
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
                             Statistics = gameData.Game.AvailableGameStats.Stats.Select(x =>
                                 new Statistic()
@@ -369,7 +299,7 @@ namespace GamePlatformsClient.ViewModel
                     {
                         await Task.Run(() =>
                         {
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            Application.Current.Dispatcher.Invoke(() =>
                             {
                                 UserAchievementList = new ObservableCollection<UserAchievement>(Achievements.Select(x => new UserAchievement(x)).ToList());
 
@@ -405,18 +335,31 @@ namespace GamePlatformsClient.ViewModel
                     {
                         await Task.Run(() =>
                         {
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            Application.Current.Dispatcher.Invoke(() =>
                             {
-                                UserStatisticList = new ObservableCollection<UserStatistic>(Statistics.Select(x => new UserStatistic(x)).ToList());
+                                var userStatisticListTemp = new ObservableCollection<UserStatistic>(Statistics.Select(x => new UserStatistic(x)).ToList());
+
+                                foreach (var element in userStatisticListTemp)
+                                {
+                                    if (string.IsNullOrWhiteSpace(element.DisplayName))
+                                    {
+                                        element.DisplayName = element.Name;
+                                    }
+
+                                    element.DisplayName = textInfo.ToTitleCase(element.DisplayName.Replace('_', ' '));
+                                }
 
                                 foreach (var element in statsData.Playerstats.Stats)
                                 {
-                                    UserStatistic stat = UserStatisticList.FirstOrDefault(x => x.Name == element.Name);
+                                    UserStatistic stat = userStatisticListTemp.FirstOrDefault(x => x.Name == element.Name);
+
                                     if (stat != null)
                                     {
                                         stat.UserValue = element.Value;
                                     }
                                 }
+
+                                UserStatisticList = userStatisticListTemp;
                             });
                         }, cancellationToken);
 
@@ -443,7 +386,7 @@ namespace GamePlatformsClient.ViewModel
                     {
                         await Task.Run(() =>
                         {
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            Application.Current.Dispatcher.Invoke(() =>
                             {
                                 GlobalAchievements = new ObservableCollection<GlobalAchievement>(Achievements.Select(x => new GlobalAchievement(x)).ToList());
 
@@ -502,7 +445,7 @@ namespace GamePlatformsClient.ViewModel
 
         private void GameSearchTextChanged(string searchGameText)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 SetGameList(searchGameText);
             });
@@ -515,8 +458,8 @@ namespace GamePlatformsClient.ViewModel
             GameListViewItemsFinal = new ObservableCollection<GameListViewItem>(list);
         }
 
-
     }
+
     public class GameListViewItem
     {
         private uint _id;

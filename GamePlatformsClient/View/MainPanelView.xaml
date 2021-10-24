@@ -9,8 +9,8 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     mc:Ignorable="d"
     DataContext="{Binding Source={StaticResource mainViewModelLocator}, Path=MainPanelViewModel}"
-    Title="" Height="700" Width="1000" Margin="0" Padding="0" Background="#2a2e33"
-    ResizeMode="NoResize" FontFamily="./Fonts/#Yantramanav">
+    Title="" MinHeight="700" MinWidth="1000" Margin="0" Padding="0" Background="#2a2e33"
+    ResizeMode="CanResize"  FontFamily="./Fonts/#Yantramanav">
 
 
     <DockPanel Height="auto">
@@ -29,6 +29,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!--Search for player info box-->
             <Grid HorizontalAlignment="Stretch" Grid.ColumnSpan="2" Background="#111923" >
 
                 <Grid HorizontalAlignment="Center">
@@ -43,10 +44,8 @@
                                 <Setter Property="CornerRadius" Value="2"></Setter>
                             </Style>
                         </TextBox.Resources>
-
-                        
                     </TextBox>
-                    <!--<Button x:Name="send" Grid.Column="1" Margin="10" Click="Send_Click">-->
+                    
                     <Button Command="{Binding GetPlayerInfoCommand}" Content="{Binding SendButtonContent, Mode=TwoWay}" Grid.Column="1" Margin="10" >
                         <Button.Resources>
                             <Style TargetType="Border">
@@ -58,28 +57,24 @@
                 </Grid>
             </Grid>
 
-
-
+            <!--Display player info box--> 
             <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50*"/>
-                    <RowDefinition Height="263*"/>
-                </Grid.RowDefinitions>
+
                 <Grid.ColumnDefinitions >
                     <ColumnDefinition Width="280"/>
-                    <!--<ColumnDefinition Width="200" />-->
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                
+                <!--Handle game list of player-->
                 <GroupBox Padding="0" BorderThickness="0" Grid.RowSpan="2">
-                    <!--<DataGrid x:Name="result" SelectionChanged="SelectionChanged"></DataGrid>-->
-
                     <Grid Margin="0,10,0,0">
+                        
                         <Grid.RowDefinitions>
                             <RowDefinition Height="25"></RowDefinition>
                             <RowDefinition Height="*"></RowDefinition>
                         </Grid.RowDefinitions>
 
-
+                        <!--Game search box--> 
                         <TextBox Grid.Row="0" Text="{Binding GameSearchText, UpdateSourceTrigger=PropertyChanged, FallbackValue=Test}" FontSize="13" VerticalAlignment="Center" TextAlignment="Left" Margin="4,0,4,0">
                             <TextBox.Resources>
                                 <Style TargetType="Border">
@@ -88,12 +83,11 @@
                             </TextBox.Resources>
                         </TextBox>
 
+                        <!--List of player`s games-->
                         <ListView Grid.Row="1" Margin="0,5,0,0" x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectedItem="{Binding SelectedGame}" ItemsSource="{Binding GameListViewItemsFinal}">
-                            <!--<ListView Grid.Row="1" Margin="0,5,0,0" x:Name="listView" BorderThickness="0" Padding="0" SelectionMode="Single" SelectedItem="{Binding SelectedGame}" SelectionChanged="GamesList_SelectionChanged" ItemsSource="{Binding GameListViewItemsFinal}">-->
-
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding GamesListSelectionChanged}"/>
+                                    <i:InvokeCommandAction Command="{Binding GamesListSelectionChangedCommand}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
 
@@ -115,13 +109,8 @@
                                                 <Border BorderBrush="{TemplateBinding BorderBrush}" 
                                                     BorderThickness="{TemplateBinding BorderThickness}" 
                                                     Background="{TemplateBinding Background}">
-                                                    
-                                                    
+
                                                     <Border x:Name="InnerBorder" BorderThickness="0" >
-                                                        
-                                                        
-                                                        
-                                                        
                                                         <Grid>
                                                             <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}">
                                                             </ContentPresenter>
@@ -129,7 +118,7 @@
                                                     </Border>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
-                                                    
+
                                                     <Trigger Property="IsMouseOver" Value="true">
                                                         <Setter Property="Background" Value="#323a4b"/>
                                                         <Setter Property="BorderBrush" Value="#323a4b"/>
@@ -139,9 +128,6 @@
                                                         <Setter Property="BorderBrush" Value="#3e4e69"/>
                                                         <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#3e4e69"/>
                                                     </Trigger>
-                                                    <!--<Trigger Property="IsEnabled" Value="false">
-                                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                                                </Trigger>-->
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
@@ -149,7 +135,7 @@
                                     <Setter Property="ContentTemplate">
                                         <Setter.Value>
                                             <DataTemplate>
-                                                
+
                                                 <Grid Margin="0">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -165,52 +151,41 @@
                                     </Setter>
                                 </Style>
                             </ListView.ItemContainerStyle>
-
                         </ListView>
-
-
-
-
                     </Grid>
-
                 </GroupBox>
 
+                <!--Info about selected game box-->
                 <GroupBox Padding="0" Grid.Column="1" BorderThickness="0" Grid.RowSpan="2">
                     <Grid Background="Transparent">
                         <Grid.RowDefinitions>
-                            <!--<RowDefinition Height="30" />-->
                             <RowDefinition Height="124" />
                             <RowDefinition Height="*" />
-                            <!--<RowDefinition Height="*" />-->
-
                         </Grid.RowDefinitions>
 
-                        <!--<Label Grid.Row="0" Name="gameTitleLabel">Title</Label>-->
+                        <!--Title and miniature of selected game-->
                         <Grid Grid.Row="0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="96.667"/>
-                                <ColumnDefinition Width="157.333"/>
+                                <ColumnDefinition Width="210"/>
+                                <!--<ColumnDefinition Width="96.667"/>-->
+                                <!--<ColumnDefinition Width="157.333"/>-->
                             </Grid.ColumnDefinitions>
 
                             <Label Grid.Column="0" Name="gameTitleLabel" FontSize="40" FontWeight="Bold" Background="#2a2e33">
                                 <Label.Content>
                                     <AccessText Text="{Binding GameTitleLabel}" Foreground="#ebeae9" TextWrapping="Wrap" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale">
                                     </AccessText>
-
                                 </Label.Content>
                             </Label>
                             <Image Grid.Column="1" Source="{Binding GameScreenSource}" Name="gameScreen" Height="auto" Width="auto" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
                         </Grid>
-                        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="Transparent">
 
+                        <!--Tabs with achievements and stats of selected game-->
+                        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="Transparent">
                             <TabControl Background="#282f38" BorderThickness="0">
                                 <TabControl.ItemContainerStyle>
                                     <Style TargetType="{x:Type TabItem}">
-                                        <!--<Setter Property="Background" Value="#282f37"></Setter>
-                                        <Setter Property="TextBlock.FontWeight" Value="Regular"></Setter>
-                                        <Setter Property="TextBlock.Foreground" Value="White"></Setter>-->
-
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="TabItem">
@@ -251,7 +226,6 @@
                                     </Style>
                                 </TabControl.ItemContainerStyle>
 
-
                                 <TabItem Header="User Achievements" IsEnabled="{Binding HasUserAchievements}">
 
                                     <ListView BorderThickness="0" Background="#24282f" x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
@@ -264,6 +238,7 @@
                                                         <Setter Property="BorderBrush" Value="Transparent" />
                                                     </Trigger>
                                                 </Style.Triggers>
+                                                
                                                 <Setter Property="Template">
                                                     <Setter.Value>
                                                         <ControlTemplate TargetType="{x:Type ListViewItem}">
@@ -289,8 +264,8 @@
                                                                         <RowDefinition Height="auto"/>
                                                                     </Grid.RowDefinitions>
 
-                                                                    <TextBlock Margin="10,10,0,0" Foreground="#e1e1e1" FontSize="16" Grid.Row="0" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
-                                                                    <TextBlock Margin="10,0,0,0" Foreground="#898989" FontSize="13" Grid.Row="1" Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
+                                                                    <TextBlock Grid.Row="0" Margin="10,10,0,0" Foreground="#e1e1e1" FontSize="16"  TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
+                                                                    <TextBlock Grid.Row="1" Margin="10,0,0,0" Foreground="#898989" FontSize="13"  Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
                                                                 </Grid>
                                                             </Grid>
                                                         </DataTemplate>
@@ -322,13 +297,12 @@
                                                     </Setter.Value>
                                                 </Setter>
 
-
                                                 <Setter Property="Background" Value="Transparent"/>
                                                 <Setter Property="Focusable" Value="False"/>
                                                 <Setter Property="ContentTemplate">
                                                     <Setter.Value>
                                                         <DataTemplate>
-                                                            <DockPanel LastChildFill="True" Margin="5">
+                                                            <DockPanel Margin="5">
 
                                                                 <Image DockPanel.Dock="Left" Width="64" Height="64" Source="{Binding Icon, FallbackValue=https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png}"></Image>
 
@@ -337,12 +311,13 @@
                                                                         <ProgressBar Padding="56" Minimum="0" Maximum="100" Value="{Binding Percent}" Foreground="#17435c" Background="#111923" BorderBrush="Transparent" BorderThickness="0" Margin="2,2,2,2"></ProgressBar>
                                                                         <Label Name="progLabel" Margin="0,0,10,0" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Percent, Converter={StaticResource percentageConverter}}" Foreground="#63bbed" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" FontSize="16"/>
 
-                                                                        <Grid Margin="10,0,0,10" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+                                                                        <Grid Margin="10,0,0,0" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                                                                             <Grid.RowDefinitions>
                                                                                 <RowDefinition Height="auto"/>
                                                                                 <RowDefinition Height="auto"/>
                                                                             </Grid.RowDefinitions>
-                                                                            <TextBlock FontSize="16" Grid.Row="0" Foreground="#c1d2d5" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
+                                                                            
+                                                                            <TextBlock Grid.Row="0" FontSize="16"  Foreground="#c1d2d5" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
                                                                             <TextBlock Grid.Row="1" FontSize="13" Foreground="#8f8d88" Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
                                                                         </Grid>
                                                                     </Grid>
@@ -352,112 +327,30 @@
                                                     </Setter.Value>
                                                 </Setter>
                                             </Style>
-
-
-
-
                                         </ListView.ItemContainerStyle>
-
-
                                     </ListView>
-
                                 </TabItem>
-                                <TabItem BorderThickness="0" Header="User Statistics" IsEnabled="{Binding HasUserStats}">
+                                <TabItem Header="User Statistics" BorderThickness="0" IsEnabled="{Binding HasUserStats, FallbackValue=True}">
+                                    <DataGrid ItemsSource="{Binding UserStatisticList}" AutoGenerateColumns="False" VirtualizingStackPanel.VirtualizationMode ="Standard">
+                                        <DataGrid.RowHeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=.,
+                        RelativeSource={RelativeSource AncestorType=DataGridRow},
+                        Converter={StaticResource rowToIndexConverter}}"></TextBlock>
+                                            </DataTemplate>
+                                        </DataGrid.RowHeaderTemplate>
 
-                                    <DataGrid ItemsSource="{Binding UserStatisticList}" AutoGenerateColumns="False">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="StatName" Binding="{Binding DisplayName}"></DataGridTextColumn>
+                                            <DataGridTextColumn Header="Statistic Name" Binding="{Binding DisplayName}"></DataGridTextColumn>
                                             <DataGridTextColumn Header="Value" Binding="{Binding UserValue}"></DataGridTextColumn>
                                         </DataGrid.Columns>
-
-
-
-
-
-
                                     </DataGrid>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                 </TabItem>
-                                <!--<TabItem Header="Global Statistics"></TabItem>-->
                             </TabControl>
-
-
-
-
                         </Grid>
-                        <!--<Image Grid.Row="0" Source="https://upload.wikimedia.org/wikipedia/commons/3/30/Googlelogo.png" Name="gameScreen" Height="172" Width="368" />-->
-                        <!--<Grid Grid.Row="2" HorizontalAlignment="Stretch">-->
-                        <!--<ListView x:Name="achievementsList" HorizontalContentAlignment="Stretch" ItemsSource="{Binding UserAchievementList, diag:PresentationTraceSources.TraceLevel=High}">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="{x:Type ListViewItem}">
-                                        <Setter Property="Focusable" Value="False"/>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Margin="0">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <Image Grid.Column="0" Source="{Binding Path=CurrentIcon}" Width="64" Height="64"></Image>
-                                                        -->
-                        <!--<TextBlock Grid.Column="1" Text="{Binding }" Foreground="#a1a8b7" FontSize="14" Padding="2" Margin="1" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>-->
-                        <!--
-                                                        <Grid Grid.Column="1" Margin="5" Background="AliceBlue" HorizontalAlignment="Stretch">
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="auto"/>
-                                                                <RowDefinition Height="auto"/>
-                                                            </Grid.RowDefinitions>
-
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <TextBlock Grid.Row="0" HorizontalAlignment="Stretch" TextBlock.FontWeight="Bold" Text="{Binding DisplayName, FallbackValue='Title of achievement'}" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale" />
-                                                            <TextBlock Grid.Row="1" HorizontalAlignment="Stretch" Text="{Binding Description, FallbackValue='Description'}"  TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="Grayscale"/>
-                                                        </Grid>
-
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-
-                                -->
-                        <!--<ListViewItem></ListViewItem>
-                                <ListViewItem></ListViewItem>
-                                <ListViewItem></ListViewItem>-->
-                        <!--
-
-                            </ListView>-->
-                        <!--</Grid>-->
                     </Grid>
-
-                    <!--<TextBox x:Name="notes" Padding="5" AcceptsReturn="True" TextWrapping="Wrap" />-->
                 </GroupBox>
             </Grid>
-
-
-
-
         </Grid>
-
-
     </DockPanel>
 </Window>
